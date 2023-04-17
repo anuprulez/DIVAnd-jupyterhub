@@ -22,7 +22,7 @@ ENV LD_LIBRARY_PATH /opt/conda/lib/
 RUN conda install -c conda-forge ncurses
 RUN conda install -y ipywidgets
 RUN conda install -y matplotlib
-RUN conda install -c conda-forge jupyterlab-git 
+RUN conda install -c conda-forge jupyterlab-git
 
 RUN wget -O /usr/share/emacs/site-lisp/julia-mode.el https://raw.githubusercontent.com/JuliaEditorSupport/julia-emacs/master/julia-mode.el
 
