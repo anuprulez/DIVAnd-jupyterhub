@@ -22,7 +22,7 @@ ENV LD_LIBRARY_PATH /opt/conda/lib/
 RUN conda install -c conda-forge ncurses
 RUN conda install -y ipywidgets
 RUN conda install -y matplotlib
-RUN conda install -c conda-forge jupyterlab-git
+RUN conda install -c conda-forge jupyterlab-git 
 
 RUN wget -O /usr/share/emacs/site-lisp/julia-mode.el https://raw.githubusercontent.com/JuliaEditorSupport/julia-emacs/master/julia-mode.el
 
@@ -77,23 +77,37 @@ USER jovyan
 RUN julia -e 'using IJulia; IJulia.installkernel("Julia with 4 CPUs",env = Dict("JULIA_NUM_THREADS" => "4"))'
 
 
+USER root
 # Pre-compiled image with PackageCompiler
 RUN julia --eval 'using Pkg; pkg"add PackageCompiler"'
 ADD DIVAnd_precompile_script.jl .
 ADD make_sysimg.sh .
-RUN ./make_sysimg.sh
+#RUN ./make_sysimg.sh
 RUN mkdir -p /home/jovyan/.local
-RUN mv sysimg_DIVAnd.so DIVAnd_precompile_script.jl make_sysimg.sh  DIVAnd_trace_compile.jl  /home/jovyan/.local
-RUN rm -f test.xml Water_body_Salinity.3Danl.nc Water_body_Salinity.4Danl.cdi_import_errors_test.csv Water_body_Salinity.4Danl.nc Water_body_Salinity2.4Danl.nc
-RUN julia -e 'using IJulia; IJulia.installkernel("Julia-DIVAnd precompiled", "--sysimage=/home/jovyan/.local/sysimg_DIVAnd.so")'
-RUN julia -e 'using IJulia; IJulia.installkernel("Julia-DIVAnd precompiled, 4 CPUs)", "--sysimage=/home/jovyan/.local/sysimg_DIVAnd.so",env = Dict("JULIA_NUM_THREADS" => "4"))'
+#RUN mv sysimg_DIVAnd.so DIVAnd_precompile_script.jl make_sysimg.sh  DIVAnd_trace_compile.jl  /home/jovyan/.local
+#RUN rm -f test.xml Water_body_Salinity.3Danl.nc Water_body_Salinity.4Danl.cdi_import_errors_test.csv Water_body_Salinity.4Danl.nc Water_body_Salinity2.4Danl.nc
+#RUN julia -e 'using IJulia; IJulia.installkernel("Julia-DIVAnd precompiled", "--sysimage=/home/jovyan/.local/sysimg_DIVAnd.so")'
+#RUN julia -e 'using IJulia; IJulia.installkernel("Julia-DIVAnd precompiled, 4 CPUs)", "--sysimage=/home/jovyan/.local/sysimg_DIVAnd.so",env = Dict("JULIA_NUM_THREADS" => "4"))'
 
 #ENV JUPYTER_ENABLE_LAB yes
 
+ENV DEBUG=false \
+    GALAXY_WEB_PORT=10000 \
+    NOTEBOOK_PASSWORD=none \
+    CORS_ORIGIN=none \
+    DOCKER_PORT=none \
+    API_KEY=none \
+    HISTORY_ID=none \
+    REMOTE_HOST=none \
+    GALAXY_URL=none
 
-
-USER root
+#USER root
 ADD run_galaxy.sh /usr/local/bin/run_galaxy.sh
+
+COPY ./jupyter_notebook_config.py /home/$NB_USER/.jupyter/
+
+RUN mamba install -c conda-forge jupytext==1.14.1
+
 USER jovyan
 
 ## use 33 (www-data) as nextcloud
